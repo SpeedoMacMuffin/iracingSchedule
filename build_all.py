@@ -24,7 +24,7 @@ SPECIAL = [
  ('2026-08-14','2026-08-15','Portimao 1000km','Algarve International Circuit','HPD, GT1, GT2',None),
  ('2026-08-25','2026-08-30','Crandon Championship','Crandon International Raceway','Pro 4, Pro 2, Rally, Cross Car','Super Session'),
  ('2026-09-02','2026-09-07','Southern 500','Darlington Raceway','NASCAR Cup',None),
- ('2026-09-10','2026-09-15','Suzuka 1000km','Suzuka Circuit','GT3','Team Event'),
+ ('2026-09-10','2026-09-14','Suzuka 1000km','Suzuka Circuit','GT3','Team Event'),   # poster says 10-15, but iRacing's dates were wrong: it ended before week 1
  ('2026-09-18','2026-09-20','Britcar 24','Silverstone','GT3, GT4','Team Event'),
  ('2026-09-25','2026-09-27','Petit Le Mans','Michelin Raceway Road Atlanta','GTP, LMP2, GT3','Team Event'),
  ('2026-10-02','2026-10-04','Bathurst 1000','Mount Panorama Circuit','Supercars','Team Event'),
@@ -48,12 +48,13 @@ page = r'''<title>2026 S4 Schedule</title>
   --bg: #eef0f3; --ink: #15181d; --muted: #5b6470; --rule: #d5dae1; --rule-soft: #e3e7ec; --tag-bg: #e2e6eb; --tag-ink: #3a424d; --place: #2f4a6d; --hot: #dcebe1;
   --cR: #d23b2e; --cD: #f0921e; --cC: #f2c51d; --cB: #1e8e4c; --cA: #2367b3;
   --onR: #fff; --onD: #15181d; --onC: #15181d; --onB: #fff; --onA: #fff;
+  --mR: #e09590; --mD: #efc188; --mC: #f0da88; --mB: #86bf9f; --mA: #88abd3;   /* class colours blended toward the ground, for row rules */
   font-size: clamp(9px, 1.4vh, 16px);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #14171c; --ink: #e8ebef; --muted: #98a1ad; --rule: #333a44; --rule-soft: #262c35; --tag-bg: #2a313b; --tag-ink: #c3cad3; --place: #9fbadf; --hot: #1d2f25; }
+  :root:not([data-theme="light"]) { --bg: #14171c; --ink: #e8ebef; --muted: #98a1ad; --rule: #333a44; --rule-soft: #262c35; --tag-bg: #2a313b; --tag-ink: #c3cad3; --place: #9fbadf; --hot: #1d2f25; --mR: #7c2b26; --mD: #8d5b1d; --mC: #8e771d; --mB: #1a5936; --mA: #1c436f; }
 }
-:root[data-theme="dark"] { --bg: #14171c; --ink: #e8ebef; --muted: #98a1ad; --rule: #333a44; --rule-soft: #262c35; --tag-bg: #2a313b; --tag-ink: #c3cad3; --place: #9fbadf; --hot: #1d2f25; }
+:root[data-theme="dark"] { --bg: #14171c; --ink: #e8ebef; --muted: #98a1ad; --rule: #333a44; --rule-soft: #262c35; --tag-bg: #2a313b; --tag-ink: #c3cad3; --place: #9fbadf; --hot: #1d2f25; --mR: #7c2b26; --mD: #8d5b1d; --mC: #8e771d; --mB: #1a5936; --mA: #1c436f; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 1rem/1.3 "Barlow", "Helvetica Neue", Arial, sans-serif; padding-block: .8rem .6rem; padding-inline: clamp(16px, 1.6vw, 32px); font-variant-numeric: tabular-nums; }
 .cond, .brand, .cats button, .weeks, h1, h2, .nm, .side, .tag, .eyebrow, .dates { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; }
@@ -71,7 +72,7 @@ button:focus-visible { outline: 2px solid var(--cA); outline-offset: 2px; }
 .weeks button:hover { border-color: var(--muted); }
 .weeks button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .weeks button.now::after { content: ""; position: absolute; left: 50%; bottom: -.45rem; width: .35rem; height: .35rem; margin-left: -.175rem; border-radius: 50%; background: var(--cB); }
-header .title { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem 1.2rem; border-bottom: 2px solid var(--ink); padding-bottom: .4rem; margin-bottom: .7rem; }
+.title { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem 1.2rem; border-bottom: 2px solid var(--ink); padding-bottom: .4rem; margin-bottom: .7rem; }
 h1 { font-weight: 700; font-size: 1.9rem; line-height: 1; margin: 0; letter-spacing: -.01em; }
 .dates { font-weight: 500; font-size: 1.25rem; color: var(--muted); }
 .eyebrow { font-weight: 600; font-size: 1.05rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
@@ -82,7 +83,10 @@ h2:first-child { padding-top: 0; }
 .count { font-size: .85rem; font-weight: 500; color: var(--muted); }
 .badge { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 3px; font-weight: 700; font-size: 1rem; }
 .cR { background: var(--cR); color: var(--onR); } .cD { background: var(--cD); color: var(--onD); } .cC { background: var(--cC); color: var(--onC); } .cB { background: var(--cB); color: var(--onB); } .cA { background: var(--cA); color: var(--onA); }
-.row { break-inside: avoid; display: flex; align-items: flex-start; gap: .8rem; padding: .28rem 0; border-top: 1px solid var(--rule-soft); }
+.row { break-inside: avoid; display: flex; align-items: flex-start; gap: .8rem; padding: .28rem 0 .28rem .55rem; border-top: 1px solid var(--rule-soft); border-left: 2px solid transparent; }
+.kR { border-left-color: var(--mR); } .kD { border-left-color: var(--mD); } .kC { border-left-color: var(--mC); } .kB { border-left-color: var(--mB); } .kA { border-left-color: var(--mA); }
+.off.kR, .off.kD, .off.kC, .off.kB, .off.kA { border-left-color: var(--rule); }
+.wx { color: var(--ink); }
 .main { flex: 1; min-width: 0; }
 .nm { font-weight: 600; font-size: 1.25rem; line-height: 1.15; letter-spacing: .005em; }
 .trk { color: var(--place); font-weight: 400; font-size: .98rem; line-height: 1.25; }
@@ -93,7 +97,9 @@ h2:first-child { padding-top: 0; }
 .off .trk { color: var(--muted); font-size: .9rem; }
 .empty { color: var(--muted); padding: 1rem 0; }
 .cols > .row:first-child { border-top: 0; }
+.cats .pill { display: inline-grid; place-items: center; min-width: 1.15rem; height: 1.15rem; padding: 0 .3rem; margin-left: .4rem; border-radius: .6rem; background: var(--cB); color: #fff; font-size: .75rem; font-weight: 700; letter-spacing: 0; vertical-align: .1em; }
 .cats .sep { width: 1px; height: 1.2rem; background: var(--rule); margin: 0 .5rem; align-self: center; }
+.ev { padding-left: 0; border-left: 0; }
 .ev .date { flex: none; min-width: 6rem; font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; font-size: 1.05rem; line-height: 1.2; padding-top: .12rem; white-space: nowrap; }
 .ev .side { white-space: normal; max-width: 11rem; }
 .ev.past { color: var(--muted); }
@@ -105,15 +111,17 @@ h2:first-child { padding-top: 0; }
   :root { font-size: 15px; }
   .cols { columns: 1; }
   .lede { display: none; }
-  .bar { gap: .5rem .8rem; }
+  header { position: sticky; top: 0; z-index: 2; background: var(--bg); margin-inline: -16px; padding: .5rem 16px .6rem; box-shadow: 0 1px 0 var(--rule); }
+  .bar { gap: .5rem .8rem; margin-bottom: 0; }
+  .brand, .weeks .lbl { display: none; }
+  .title { margin-top: .8rem; }
   .cats button { padding: .45rem .6rem; font-size: 1.05rem; }
   .cats .sep { display: none; }
   .weeks { margin-left: 0; flex-wrap: wrap; gap: .3rem; }
-  .weeks .lbl { flex-basis: 100%; margin: 0; }
   .weeks button { width: 2.6rem; height: 2.4rem; font-size: 1.1rem; }
   .weeks button.now::after { bottom: .2rem; }
   h1 { font-size: 2.2rem; }
-  .row { flex-wrap: wrap; gap: .15rem .8rem; padding: .5rem 0; }
+  .row { flex-wrap: wrap; gap: .15rem .8rem; padding-block: .5rem; }
   .side { flex-basis: 100%; text-align: left; white-space: normal; padding-top: 0; display: flex; flex-wrap: wrap; gap: 0 .3rem; }
   .side div + div::before { content: "· "; }
   .ev .side { margin-left: calc(6rem + .8rem); max-width: none; }
@@ -126,13 +134,13 @@ h2:first-child { padding-top: 0; }
     <nav class="cats" id="cats" aria-label="Category"></nav>
     <nav class="weeks" id="weeks" aria-label="Week"><span class="lbl">Week</span></nav>
   </div>
-  <div class="title">
-    <h1 id="h1">Week 1</h1>
-    <div class="dates" id="dates"></div>
-    <div class="eyebrow" id="catname"></div>
-    <div class="lede" id="lede"></div>
-  </div>
 </header>
+<div class="title">
+  <h1 id="h1">Week 1</h1>
+  <div class="dates" id="dates"></div>
+  <div class="eyebrow" id="catname"></div>
+  <div class="lede" id="lede"></div>
+</div>
 <div class="cols" id="cols"></div>
 <script type="application/json" id="data">__DATA__</script>
 <script>
@@ -190,6 +198,10 @@ h2:first-child { padding-top: 0; }
   function render() {
     const cat = DATA.categories.find(c => c.key === state.cat);
     const [ws, we] = weekRange(state.week);
+    const hotEv = DATA.special.filter(ev => ev.e >= ws && ev.s <= we);
+    const sb = catsEl.querySelector(`button[data-cat="${SPECIAL_KEY}"]`);
+    sb.innerHTML = 'Special Events' + (hotEv.length ? `<span class="pill" aria-label="${hotEv.length} this week">${hotEv.length}</span>` : '');
+    sb.title = hotEv.length ? `This week: ${hotEv.map(e => e.name).join(', ')}` : 'No special event this week';
     catsEl.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.cat === state.cat)));
     weeksEl.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.week === state.week)));
     document.getElementById('h1').textContent = `Week ${state.week}`;
@@ -210,19 +222,20 @@ h2:first-child { padding-top: 0; }
           const l1 = [w.t != null ? `${w.t} °C` : null, w.r].filter(Boolean).join(' · ');
           const l2 = [w.s, w.sim ? `sim ${w.sim}` : null].filter(Boolean).join(' · ');
           const car = w.car ? ` <span class="car">· ${esc(w.car)}</span>` : '';
-          rows.push(`<div class="row"><div class="main"><div>${name}</div><div class="trk">${esc(tracks)}${car}</div></div><div class="side"><div>${esc(l1)}</div><div>${esc(l2)}</div></div></div>`);
+          const wx = w.wx ? ' · <span class="wx" title="Forecast regenerated for each race">↻ per race</span>' : '';
+          rows.push(`<div class="row k${k.cls}"><div class="main"><div>${name}</div><div class="trk">${esc(tracks)}${car}</div></div><div class="side"><div>${esc(l1)}${wx}</div><div>${esc(l2)}</div></div></div>`);
         } else {
           const next = s.weeks.filter(w => w.d > we).sort((a, b) => a.d < b.d ? -1 : 1)[0];
           if (!next) continue; // season over for this series
           off++;
-          rows.push(`<div class="row off"><div class="main"><div>${name}</div><div class="trk">No round this week · next ${fmtDM(next.d)}</div></div></div>`);
+          rows.push(`<div class="row off k${k.cls}"><div class="main"><div>${name}</div><div class="trk">No round this week · next ${fmtDM(next.d)}</div></div></div>`);
         }
       }
       if (!rows.length) continue;
       html += `<h2><span class="badge c${k.cls}">${k.cls}</span>${k.label}<span class="count">${rows.length}</span></h2>${rows.join('')}`;
     }
     document.getElementById('cols').innerHTML = html || '<div class="empty">Nothing scheduled in this category for this week.</div>';
-    document.getElementById('lede').textContent = `${racing} series on track${off ? `, ${off} without a round` : ''}. Temperatures are air temp at session start; “sim” is the in-game time of day. ← → change week.`;
+    document.getElementById('lede').textContent = `${racing} series on track${off ? `, ${off} without a round` : ''}. Air temp at session start; “sim” is in-game time of day; ↻ per race: forecast regenerated for every race. ← → change week.`;
     document.title = `2026 S4 Schedule`;
   }
   readHash(); writeHash(); render();

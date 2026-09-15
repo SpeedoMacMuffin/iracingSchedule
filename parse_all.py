@@ -88,17 +88,20 @@ def parse_entry(e, sname, weekly_cars=False, cars=''):
     rm = re.search(r'Rain chance ([^,]+?)(?:,|$)', settings)
     if rm:
         r = rm.group(1).strip()
-        r = 'dry' if r == 'None' else r
-        r = re.sub(r'^(\d+)%$', r'\1% rain', r)
-        r = re.sub(r'^(\d+)% \((\d+)% before session\)$', r'\1% rain, \2% before', r)
-        r = re.sub(r'^(\d+)% \(None before session\)$', r'\1% rain, dry before', r)
-        r = r.replace('Slight (None before session)', 'slight rain')
+        # forms: "None", "Slight", "26%", and any of those followed by "(<form> before session)"
+        mm = re.match(r'^(\S+)(?: \((\S+) before session\))?$', r)
+        if mm:
+            main, before = mm.group(1), mm.group(2)
+            word = lambda x: 'dry' if x == 'None' else ('slight' if x == 'Slight' else x)
+            r = 'dry' if main == 'None' else ('slight rain' if main == 'Slight' else f'{main} rain')
+            if before: r += f', {word(before)} before'
         rain = r
     elif settings.startswith('Constant weather'): rain = 'constant weather'
     else: problems.append(f'no rain: {sname} wk{e["week"]}: {settings[:80]}')
     sm_ = re.search(r'\b(Standing|Rolling)\b', settings); st = sm_.group(1) if sm_ else None
     if st is None: problems.append(f'no start: {sname} wk{e["week"]}: {settings[:80]}')
     out_ = {'w': e['week'], 'd': e['date'], 'track': ' '.join(track_parts), 't': temp, 'r': rain, 's': st, 'sim': sim}
+    if 'Forecast regenerated' in settings: out_['wx'] = 1   # iRacing regenerates the weather forecast for every race
     if car_parts: out_['car'] = re.sub(r'\s+', ' ', ' '.join(car_parts))
     return out_
 
@@ -130,6 +133,12 @@ for c in CATS:
             items.append({'name': short_name(name), 'full': name, 'tags': tags, 'cadence': cadence, 'weeks': weeks})
         catobj['classes'].append({'cls': cls, 'label': clabel, 'series': items})
     out['categories'].append(catobj)
+# 13th week (the gap week after week 12) is offered when the schedule has rounds in it
+import datetime as _dt
+_s = _dt.date.fromisoformat(SEASON_START) + _dt.timedelta(days=84); _e = _s + _dt.timedelta(days=6)
+_in13 = [s['name'] for c in out['categories'] for k in c['classes'] for s in k['series'] if any(_s.isoformat() <= w['d'] <= _e.isoformat() for w in s['weeks'])]
+if _in13: out['weeks'] = 13
+print('13th week rounds:', len(_in13), _in13[:6])
 json.dump(out, open('schedule.json','w'), ensure_ascii=False)
 for c in out['categories']:
     n = sum(len(k['series']) for k in c['classes']); print(c['label'], n, 'series;', {k['cls']: len(k['series']) for k in c['classes']})
