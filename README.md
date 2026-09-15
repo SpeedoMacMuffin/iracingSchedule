@@ -28,7 +28,6 @@ no build step is needed. Google Fonts are loaded from fonts.googleapis.com, ever
 ## Parsing notes
 
 - "Forecast regenerated for each race" in a round's settings sets `wx: 1`; the page shows it as "↻ per race" next to the weather.
-- If any series has rounds in the 13th week (the gap week after week 12), the page offers a week 13 button.
 
 - Series names are prefixed with a form-feed character in the pdftotext output; it is stripped up front.
 - Columns are sliced by character position from the "Week N" line (track / weather+settings / length).

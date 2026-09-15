@@ -133,12 +133,6 @@ for c in CATS:
             items.append({'name': short_name(name), 'full': name, 'tags': tags, 'cadence': cadence, 'weeks': weeks})
         catobj['classes'].append({'cls': cls, 'label': clabel, 'series': items})
     out['categories'].append(catobj)
-# 13th week (the gap week after week 12) is offered when the schedule has rounds in it
-import datetime as _dt
-_s = _dt.date.fromisoformat(SEASON_START) + _dt.timedelta(days=84); _e = _s + _dt.timedelta(days=6)
-_in13 = [s['name'] for c in out['categories'] for k in c['classes'] for s in k['series'] if any(_s.isoformat() <= w['d'] <= _e.isoformat() for w in s['weeks'])]
-if _in13: out['weeks'] = 13
-print('13th week rounds:', len(_in13), _in13[:6])
 json.dump(out, open('schedule.json','w'), ensure_ascii=False)
 for c in out['categories']:
     n = sum(len(k['series']) for k in c['classes']); print(c['label'], n, 'series;', {k['cls']: len(k['series']) for k in c['classes']})
