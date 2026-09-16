@@ -37,6 +37,18 @@ while i < len(sec):
 problems = []
 SETTINGS_WORDS = {'Detached','Rolling','Standing','Local','Cautions','Qual','Grid','Min','Max','Drive','Full','Single','Double','Constant','advisory','enforced','cautions','start','scrutiny'}
 EXTRA = []
+def fmt_len(num, unit, heats):
+    if num is not None and unit != 'x':
+        n = int(num)
+        if unit == 'laps': return f'{n} laps'
+        if n >= 60 and n % 60 == 0: return f'{n // 60} h'
+        if n >= 60: return f'{n // 60} h {n % 60} min'
+        return f'{n} min'
+    if heats:
+        names = {'H': 'Heat', 'C': 'Consi', 'F': 'Feature'}
+        return ' · '.join(f"{names.get(h[0], h[0])} {h[2:-1]}" for h in heats) + ' laps'
+    return None
+
 def parse_entry(e, sname, weekly_cars=False, cars=''):
     first = e['lines'][0]
     posB = re.match(r'^Week \d+ \(\d{4}-\d{2}-\d{2}\)\s+', first).end()
@@ -48,6 +60,8 @@ def parse_entry(e, sname, weekly_cars=False, cars=''):
     hm = re.search(r'\s[A-Z]:\d+L\s*$', first)
     posD = lm.start(1) if lm else (hm.start()+1 if hm else len(first))
     unit = (lm.group(2) or '').strip() if lm else 'x'
+    num = lm.group(1) if lm else None
+    heats = [hm.group(0).strip()] if (hm and not lm) else []
     colB = [first[posB:posC].strip()]; colC = [first[posC:posD].strip()]
     mid = (posB + posC) // 2
     for s in e['lines'][1:]:
@@ -64,7 +78,8 @@ def parse_entry(e, sname, weekly_cars=False, cars=''):
                 toks.append((s[pos:cut].strip(), pos)); toks.append((s[cut:end].strip(), posC))
             else: toks.append((tok, pos))
         for tok, pos in toks:
-            if not tok or re.match(r'^[A-Z]:\d+L$', tok) or tok in ('mins', 'laps'): continue
+            if tok and re.match(r'^[A-Z]:\d+L$', tok): heats.append(tok); continue
+            if not tok or tok in ('mins', 'laps'): continue
             if not unit and re.search(r' (mins|laps)$', tok): tok = tok.rsplit(' ', 1)[0]; unit = 'x'
             (colB if pos < mid else colC).append(tok)
     car_parts = []
@@ -102,6 +117,15 @@ def parse_entry(e, sname, weekly_cars=False, cars=''):
     if st is None: problems.append(f'no start: {sname} wk{e["week"]}: {settings[:80]}')
     out_ = {'w': e['week'], 'd': e['date'], 'track': ' '.join(track_parts), 't': temp, 'r': rain, 's': st, 'sim': sim}
     if 'Forecast regenerated' in settings: out_['wx'] = 1   # iRacing regenerates the weather forecast for every race
+    out_['len'] = fmt_len(num, unit, heats)
+    cm = re.search(r'(Cautions disabled|Local enforced cautions|Local advisory cautions|Full course cautions)', settings)
+    if cm: out_['caut'] = {'Cautions disabled': 'none', 'Local enforced cautions': 'local, enforced', 'Local advisory cautions': 'local, advisory', 'Full course cautions': 'full course'}[cm.group(1)]
+    qm = re.search(r'Qual scrutiny - (\w+)', settings)
+    if qm: out_['qual'] = qm.group(1)
+    tm_ = re.search(r'Min (\d+) drivers?, Max (\d+) drivers?', settings)
+    if tm_: out_['drv'] = f'{tm_.group(1)}–{tm_.group(2)} drivers'
+    if 'Detached qual' in settings: out_['dq'] = 1
+    if 'Grid by class' in settings: out_['grid'] = 1
     if car_parts: out_['car'] = re.sub(r'\s+', ' ', ' '.join(car_parts))
     return out_
 
@@ -121,16 +145,24 @@ for c in CATS:
             hdr = s['header']
             if not hdr: problems.append(f'no header: {c} {cls} first week line {s["weeks"][0]["lines"][0][:60]}'); continue
             name = hdr[0]
-            lic_i = next((i for i,h in enumerate(hdr) if re.search(r'\(\d\.\d\) --> ', h)), None)
+            lic_i = next((i for i,h in enumerate(hdr) if re.search(r'\d\.\d\)? --> ', h)), None)   # "Rookie (4.0) --> Pro/WC (4.0)" or, since the final PDF, "Rookie 4.0 --> Pro/WC 4.0"
+            if lic_i is None: problems.append(f'no licence line: {name}')
             lic = hdr[lic_i] if lic_i is not None else ''
-            cadence = hdr[lic_i+1] if lic_i is not None and lic_i+1 < len(hdr) else ''
             tags = []
             if re.search(r'\bFixed\b', name): tags.append('Fixed')
             if 'Team racing' in lic: tags.append('Team')
             weekly = any(h.startswith('See race week') for h in hdr)
             cars = ' '.join(h.strip() for h in hdr[1:lic_i]) if lic_i else ''
             weeks = [w for w in (parse_entry(e, name, weekly, cars) for e in s['weeks']) if w]
-            items.append({'name': short_name(name), 'full': name, 'tags': tags, 'cadence': cadence, 'weeks': weeks})
+            info = {'lic': re.sub(r',\s*(Team|Heat) racing', '', lic).replace('-->', '→').strip()}
+            cadence = ''
+            for h in (hdr[lic_i + 1:] if lic_i is not None else []):
+                em = re.match(r'Min entries for official: (\d+) \| Split at: (\d+) \| Drops: (\d+)', h)
+                if em: info['min'], info['split'], info['drops'] = int(em.group(1)), int(em.group(2)), int(em.group(3))
+                elif 'incident' in h: info['pen'] = h.strip()
+                elif h.strip().endswith('rule set'): info['rules'] = h.strip()[:-len(' rule set')]
+                elif not cadence: cadence = h.strip()
+            items.append({'name': short_name(name), 'full': name, 'tags': tags, 'cadence': cadence, 'cars': '' if weekly else cars, 'weekly': weekly, 'weeks': weeks, **info})
         catobj['classes'].append({'cls': cls, 'label': clabel, 'series': items})
     out['categories'].append(catobj)
 json.dump(out, open('schedule.json','w'), ensure_ascii=False)

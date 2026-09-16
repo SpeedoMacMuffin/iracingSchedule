@@ -2,7 +2,10 @@
 
 Builds a single self-contained HTML page from the official iRacing season schedule PDF:
 category tabs (Oval, Sports Car, Formula Car, Dirt Oval, Dirt Road, Unranked), a week 1–12 picker,
-and a Special Events tab. Fits one desktop screen; type scales with window height.
+and a Special Events tab. Two views: **List** (every class on one desktop screen; type scales with window height)
+and **Cards** (one licence class at a time, badge buttons / arrows / swipe to change class).
+Clicking a series opens a detail panel: this week's race format, cars, session rules and the season calendar.
+URL hash carries the state, e.g. `#sports-car/10` or `#sports-car/10/cards/C`.
 
 ## Rebuild
 
@@ -29,6 +32,7 @@ no build step is needed. Google Fonts are loaded from fonts.googleapis.com, ever
 
 - "Forecast regenerated for each race" in a round's settings sets `wx: 1`; the page shows it as "↻ per race" next to the weather.
 
+- The licence line reads "Rookie (4.0) --> Pro/WC (4.0)" in older PDFs and "Rookie 4.0 --> Pro/WC 4.0" in the final 2026 S4 PDF; both are matched (a miss silently drops cars, cadence and Team tags, so the parser now reports it as a problem).
 - Series names are prefixed with a form-feed character in the pdftotext output; it is stripped up front.
 - Columns are sliced by character position from the "Week N" line (track / weather+settings / length).
   Continuation lines are split on 2+ spaces and assigned by position; tokens straddling the boundary are cut at a word boundary.
