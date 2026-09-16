@@ -44,16 +44,18 @@ page = r"""<title>2026 S4 Schedule</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
 <style>
 :root {
-  --bg: #eef0f3; --surface: #ffffff; --hover: #e4e8ed; --ink: #15181d; --muted: #4b535e; --rule: #d5dae1; --rule-soft: #e3e7ec; --tag-bg: #e2e6eb; --tag-ink: #3a424d; --place: #2f4a6d; --hot: #dcebe1;
+  color-scheme: dark;
+  --bg: #14171c; --surface: #1c2027; --hover: #242a33; --ink: #eef1f4; --muted: #b3bcc7; --rule: #3a424d; --rule-soft: #2a313a; --tag-bg: #2f3742; --tag-ink: #d5dbe2; --place: #a9c4e6; --hot: #1f3a2b;
   --cR: #d23b2e; --cD: #f0921e; --cC: #f2c51d; --cB: #1e8e4c; --cA: #2367b3;
   --onR: #fff; --onD: #15181d; --onC: #15181d; --onB: #fff; --onA: #fff;
-  --mR: #e09590; --mD: #efc188; --mC: #f0da88; --mB: #86bf9f; --mA: #88abd3;   /* class colours blended toward the ground, for row rules */
+  --mR: #8a3029; --mD: #9c651f; --mC: #9c821f; --mB: #1e6a3e; --mA: #234c7c;   /* class colours blended toward the ground, for row rules */
   font-size: clamp(12px, 1.4vh, 16px);
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #14171c; --surface: #1c2027; --hover: #22272f; --ink: #e8ebef; --muted: #a6afbb; --rule: #333a44; --rule-soft: #262c35; --tag-bg: #2a313b; --tag-ink: #c3cad3; --place: #9fbadf; --hot: #1d2f25; --mR: #7c2b26; --mD: #8d5b1d; --mC: #8e771d; --mB: #1a5936; --mA: #1c436f; }
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #eef0f3; --surface: #ffffff; --hover: #e4e8ed; --ink: #15181d; --muted: #3f4750; --rule: #cfd5dc; --rule-soft: #dfe3e8; --tag-bg: #dde2e8; --tag-ink: #2f3740; --place: #29405f; --hot: #d9eadf;
+  --mR: #dc8a84; --mD: #eab876; --mC: #ecd377; --mB: #79b693; --mA: #7ca3cf;
 }
-:root[data-theme="dark"] { --bg: #14171c; --surface: #1c2027; --hover: #22272f; --ink: #e8ebef; --muted: #a6afbb; --rule: #333a44; --rule-soft: #262c35; --tag-bg: #2a313b; --tag-ink: #c3cad3; --place: #9fbadf; --hot: #1d2f25; --mR: #7c2b26; --mD: #8d5b1d; --mC: #8e771d; --mB: #1a5936; --mA: #1c436f; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 1rem/1.3 "Barlow", "Helvetica Neue", Arial, sans-serif; padding-block: .8rem .6rem; padding-inline: clamp(16px, 1.6vw, 32px); font-variant-numeric: tabular-nums; }
 .brand, .cats button, .weeks, h1, h2, h3, .nm, .tag, .eyebrow, .dates, .view, .cardnav, .dtitle, .cal .wk, .cal .ln { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; }
@@ -76,15 +78,16 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--cA); o
 .view { display: inline-flex; margin-left: .9rem; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
 .weeks .view button { width: auto; height: 1.9rem; border: 0; border-radius: 0; padding: 0 .55rem; font-size: .85rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .weeks .view button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.weeks .theme { margin-left: .5rem; font-size: 1.05rem; }
 .title { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem 1.2rem; border-bottom: 2px solid var(--ink); padding-bottom: .4rem; margin-bottom: .7rem; }
 h1 { font-weight: 700; font-size: 1.9rem; line-height: 1; margin: 0; letter-spacing: -.01em; }
 .dates { font-weight: 500; font-size: 1.25rem; color: var(--muted); }
 .eyebrow { font-weight: 600; font-size: 1.05rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.lede { margin-left: auto; color: var(--muted); font-size: .95rem; }
+.lede { margin-left: auto; color: var(--muted); font-size: .95rem; font-weight: 500; }
 .cols { columns: 3; column-gap: 2rem; column-rule: 1px solid var(--rule); }
 h2 { display: flex; align-items: center; gap: .5rem; margin: 0 0 .3rem; padding-top: .5rem; font-weight: 600; font-size: 1.25rem; letter-spacing: .03em; text-transform: uppercase; break-after: avoid; break-inside: avoid; }
 h2:first-child { padding-top: 0; }
-.count { font-size: .85rem; font-weight: 500; color: var(--muted); }
+.count { font-size: .9rem; font-weight: 500; color: var(--muted); }
 .badge { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 3px; font-weight: 700; font-size: 1rem; }
 .cR { background: var(--cR); color: var(--onR); } .cD { background: var(--cD); color: var(--onD); } .cC { background: var(--cC); color: var(--onC); } .cB { background: var(--cB); color: var(--onB); } .cA { background: var(--cA); color: var(--onA); }
 .row { break-inside: avoid; display: flex; align-items: flex-start; gap: .8rem; padding: .28rem 0 .28rem .55rem; border-top: 1px solid var(--rule-soft); border-left: 2px solid transparent; }
@@ -94,9 +97,9 @@ h2:first-child { padding-top: 0; }
 .wx { color: var(--ink); }
 .main { flex: 1; min-width: 0; }
 .nm { font-weight: 600; font-size: 1.25rem; line-height: 1.15; letter-spacing: .005em; }
-.trk { color: var(--place); font-weight: 400; font-size: 1rem; line-height: 1.3; }
+.trk { color: var(--place); font-weight: 500; font-size: 1rem; line-height: 1.3; }
 .car { color: var(--ink); font-weight: 500; }
-.side { flex: none; text-align: right; font-weight: 500; font-size: .95rem; line-height: 1.4; color: var(--muted); white-space: nowrap; padding-top: .1rem; }
+.side { flex: none; text-align: right; font-weight: 500; font-size: 1rem; line-height: 1.3; color: var(--muted); white-space: nowrap; padding-top: .1rem; }
 .tag { font-weight: 600; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; background: var(--tag-bg); color: var(--tag-ink); padding: 0 .35rem; border-radius: 2px; margin-left: .4rem; vertical-align: .1em; }
 .tag.now { background: var(--cB); color: #fff; }
 .off .nm { color: var(--muted); font-weight: 500; }
@@ -119,8 +122,8 @@ h2:first-child { padding-top: 0; }
 .card:hover { border-color: var(--muted); }
 .card .nm { font-size: 1.35rem; }
 .card .trk { font-size: 1.02rem; }
-.card .cars { color: var(--muted); font-size: .95rem; font-weight: 500; }
-.card .meta { color: var(--muted); font-size: .95rem; font-weight: 500; margin-top: .35rem; display: flex; flex-wrap: wrap; gap: 0 .7rem; line-height: 1.4; }
+.card .cars { color: var(--muted); font-size: 1rem; font-weight: 500; }
+.card .meta { color: var(--muted); font-size: 1rem; font-weight: 500; margin-top: .35rem; display: flex; flex-wrap: wrap; gap: 0 .7rem; line-height: 1.4; }
 .card .len { margin-left: auto; color: var(--ink); font-weight: 600; }
 .card.off .nm, .card.off .trk { color: var(--muted); font-weight: 500; }
 .kR { border-left-color: var(--mR); } .kD { border-left-color: var(--mD); } .kC { border-left-color: var(--mC); } .kB { border-left-color: var(--mB); } .kA { border-left-color: var(--mA); }
@@ -138,19 +141,20 @@ dialog.detail::backdrop { background: rgba(10, 12, 16, .4); }
 .dhead { display: flex; align-items: flex-start; gap: .7rem; padding: 1rem 1.1rem .8rem; border-bottom: 2px solid var(--ink); position: sticky; top: 0; background: var(--surface); z-index: 1; }
 .dhead .badge { width: 2rem; height: 2rem; font-size: 1.25rem; flex: none; margin-top: .15rem; }
 .dtitle { font-weight: 700; font-size: 1.6rem; line-height: 1.1; text-wrap: balance; }
-.dsub { color: var(--muted); font-size: .92rem; margin: .2rem 0 0; }
+.dsub { color: var(--muted); font-size: .95rem; font-weight: 500; margin: .2rem 0 0; }
 .dclose { margin-left: auto; flex: none; width: 2.2rem; height: 2.2rem; border: 1px solid var(--rule); background: transparent; border-radius: 3px; font-size: 1.4rem; line-height: 1; cursor: pointer; }
 .dbody { padding: .2rem 1.1rem 1.4rem; }
 .dbody h3 { font-weight: 600; font-size: 1rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 1.1rem 0 .4rem; }
 .dbody p { margin: 0; font-size: 1rem; }
 .kv { display: grid; grid-template-columns: 7.5rem 1fr; gap: .3rem .8rem; font-size: 1rem; margin: 0; }
-.kv dt { color: var(--muted); }
+.kv dt { color: var(--muted); font-weight: 500; }
 .kv dd { margin: 0; }
 .cal { list-style: none; margin: 0; padding: 0; font-size: 1rem; }
 .cal li { display: grid; grid-template-columns: 2.4rem 4rem 1fr auto; gap: .6rem; padding: .3rem .5rem; margin: 0 -.5rem; border-top: 1px solid var(--rule-soft); align-items: baseline; }
 .cal li.cur { background: var(--hot); border-radius: 3px; border-top-color: transparent; }
 .cal .wk { font-weight: 700; color: var(--muted); }
 .cal .dt { font-weight: 500; color: var(--muted); }
+.cal .tr { font-weight: 500; }
 .cal .tr { color: var(--place); }
 .cal .ln { font-weight: 600; white-space: nowrap; }
 @media (max-width: 1000px) { .cols { columns: 2; } .weeks { margin-left: 0; } }
@@ -180,6 +184,7 @@ dialog.detail::backdrop { background: rgba(10, 12, 16, .4); }
   .kv { grid-template-columns: 6.5rem 1fr; }
 }
 </style>
+<script>(function(){var t='dark';try{t=localStorage.getItem('theme')==='light'?'light':'dark';}catch(e){}document.documentElement.setAttribute('data-theme',t);})();</script>
 <header>
   <div class="bar">
     <div class="brand">iRacing 2026 Season 4</div>
@@ -241,11 +246,15 @@ dialog.detail::backdrop { background: rgba(10, 12, 16, .4); }
     const [s, e] = weekRange(w);
     weeksEl.insertAdjacentHTML('beforeend', `<button type="button" data-week="${w}" class="${w === thisWeek ? 'now' : ''}" title="${fmtDay(s)} – ${fmtDay(e)}${w === thisWeek ? ' (this week)' : ''}">${w}</button>`);
   }
-  weeksEl.insertAdjacentHTML('beforeend', `<div class="view" id="view" role="group" aria-label="View"><button type="button" data-view="list">List</button><button type="button" data-view="cards">Cards</button></div>`);
+  weeksEl.insertAdjacentHTML('beforeend', `<div class="view" id="view" role="group" aria-label="View"><button type="button" data-view="list">List</button><button type="button" data-view="cards">Cards</button></div><button type="button" class="theme" id="theme"></button>`);
+  const themeBtn = document.getElementById('theme');
+  function paintTheme() { const light = document.documentElement.getAttribute('data-theme') === 'light'; themeBtn.textContent = light ? '☾' : '☀'; themeBtn.setAttribute('aria-label', light ? 'Switch to dark mode' : 'Switch to light mode'); themeBtn.title = themeBtn.getAttribute('aria-label'); }
+  paintTheme();
   weeksEl.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.week) set({ week: +b.dataset.week });
     else if (b.dataset.view) set({ view: b.dataset.view });
+    else if (b.id === 'theme') { const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', next); try { localStorage.setItem('theme', next); } catch (e) {} paintTheme(); }
   });
   document.addEventListener('keydown', e => {
     if (e.altKey || e.ctrlKey || e.metaKey || document.getElementById('detail').open) return;
@@ -403,7 +412,7 @@ dialog.detail::backdrop { background: rgba(10, 12, 16, .4); }
 if STANDALONE:
     head, body = page.split('</style>\n', 1)
     page = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
-            '<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="color-scheme" content="light dark">\n'
+            '<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="color-scheme" content="dark light">\n'
             + head + '</style>\n</head>\n<body>\n' + body + '</body>\n</html>\n')
 open(OUT, 'w').write(page)
 print(OUT, len(page), 'bytes', '(standalone)' if STANDALONE else '(artifact fragment)')
